@@ -1,0 +1,3 @@
+在cn.pcshao.xgames.wechat_jump2jump.control.jump执行主方法
+
+2018/3/9
