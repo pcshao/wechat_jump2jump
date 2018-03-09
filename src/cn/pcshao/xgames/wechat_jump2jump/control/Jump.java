@@ -66,6 +66,10 @@ public class Jump implements Jump_main{
 	    }
 	}
 
+	/**
+	 * 连接手机，分别为截屏功能和截屏传到pc方法
+	 * @param file
+	 */
 	@Override
 	public void Connect_phone(File file) {
 		ADB_tools adb_tools = new ADB_tools();
@@ -75,6 +79,10 @@ public class Jump implements Jump_main{
 	    adb_tools.Pullimage(file);
 	}
 
+	/**
+	 * 控制手机模拟点击
+	 * @param distance
+	 */
 	@Override
 	public void Control_phone(int distance) {
 		ADB_tools adb_tools = new ADB_tools();
@@ -84,6 +92,12 @@ public class Jump implements Jump_main{
         adb_tools.Swipe(pressX, pressY, distance);
 	}
 
+	/**
+	 * 手机端截图已经到了pc端
+	 * 这里根据截图路径获得image对象
+	 * @param path
+	 * @return
+	 */
 	@Override
 	public BufferedImage GetImage(String path) {
 		BufferedImage bufferedImage = null;
@@ -97,7 +111,12 @@ public class Jump implements Jump_main{
 		return bufferedImage;
 	}
 
-	//重新获得位置方法
+	/**
+	 * 图像识别，识别出位置
+	 * 算法非原创（原创也不一定写得好0.0）
+	 * @param bufferedImage
+	 * @return
+	 */
 	@Override
 	public Postion GetPostion(BufferedImage bufferedImage) {
 		Postion postion = new Postion();
@@ -106,44 +125,46 @@ public class Jump implements Jump_main{
 		WhitePointFinder whitePointFinder = new WhitePointFinder();
 		//自己位置
 		postion.setMyPos(myPosFinder.find(bufferedImage));
-		if(postion !=null) {
+		if (postion != null) {
 			//下一跳
 			int[] nextCenter = nextcenter.find(bufferedImage, postion.getMyPos());
 			if (nextCenter != null || nextCenter[0] != 0) {
 				int[] whitePoint = whitePointFinder.find(bufferedImage, nextCenter[0] - 120, nextCenter[1], nextCenter[0] + 120, nextCenter[1] + 180);
 				if (whitePoint != null) {
-                    //有中心白点时的坐标
+					//有中心白点时的坐标
 					postion.setCenterx(whitePoint[0]);
 					postion.setCentery(whitePoint[1]);
-                } else {
-                    //无中心白点时的坐标
-                	//中心横纵坐标=左右横纵坐标和除以2
-                    if (nextCenter[2] != Integer.MAX_VALUE && nextCenter[4] != Integer.MIN_VALUE) {
-                        postion.setCenterx((nextCenter[2] + nextCenter[4]) / 2);
-                        postion.setCentery((nextCenter[3] + nextCenter[5]) / 2);
-                    } else {
-                    	postion.setCenterx(nextCenter[0]);
-                    	postion.setCentery(nextCenter[0] + 48);
-                    }
-                }			
-			}else {
-                System.err.println("find nextCenter, fail");
-            }
+				} else {
+					//无中心白点时的坐标
+					//中心横纵坐标=左右横纵坐标和除以2
+					if (nextCenter[2] != Integer.MAX_VALUE && nextCenter[4] != Integer.MIN_VALUE) {
+						postion.setCenterx((nextCenter[2] + nextCenter[4]) / 2);
+						postion.setCentery((nextCenter[3] + nextCenter[5]) / 2);
+					} else {
+						postion.setCenterx(nextCenter[0]);
+						postion.setCentery(nextCenter[0] + 48);
+					}
+				}
+			} else {
+				System.err.println("find nextCenter, fail");
+			}
 		}
 		return postion;
 	}
-	
-	//多继承自获得位置
-	
 
+	/**
+	 * 通过位置postion对象来获取自身旗子到下一跳的距离
+	 * @param postion
+	 * @return
+	 */
 	@Override
 	public int Distance(Postion postion) {
 		
-		System.out.println( "IS"+(int)( Math.sqrt(
-				postion.getCenterx()-postion.getMx()*postion.getCenterx()-postion.getMx() )+
-				( postion.getCentery()-postion.getMy() )*( postion.getCentery()-postion.getMy() ) 
-				) );
-        //距离计算公式
+//		System.out.println( "IS"+(int)( Math.sqrt(
+//				postion.getCenterx()-postion.getMx()*postion.getCenterx()-postion.getMx() )+
+//				( postion.getCentery()-postion.getMy() )*( postion.getCentery()-postion.getMy() )
+//				) );
+        //距离计算公式（两点公式，初中应该就学了的）
         int distance = (int) (Math.sqrt(
         		Math.pow( postion.getCenterx() - postion.getMx(), 2 )
         	  + Math.pow( postion.getCentery() - postion.getMy(), 2 )
